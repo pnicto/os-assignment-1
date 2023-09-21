@@ -1,0 +1,16 @@
+TASKS
+All of them
+
+OTHER WORK
+Figure out which of the header files in client.h are/aren't needed
+Error handling for user inputing non numbers in client.c
+Update message buffer mtext array size after the code that uses it is written, if it seems too large/too small
+Add cleanup work in error handling (clients should try ask server to remove their client id if it was added before, server should try delete message queue if it has already been made)
+
+MESSAGE QUEUE MTYPES
+1-9: for sending messages to server:
+  1: termination request from cleanup.c
+  2: creation request for new client
+  3: client deletion
+  4-6: client reqeusts of types 1-3 respectively
+11+: to send a message to client with id n, use mtype n + 10
