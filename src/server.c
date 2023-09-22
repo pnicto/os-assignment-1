@@ -69,11 +69,11 @@ int main() {
 }
 
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {
-  struct MessageBuffer messageBuffer;
-  messageBuffer.mtype = requestBuffer.clientID;
-  sprintf(messageBuffer.mtext, "hello");
+  struct MessageBuffer responseBuffer;
+  responseBuffer.mtype = requestBuffer.clientID;
+  sprintf(responseBuffer.mtext, "hello");
 
-  if (msgsnd(messageQueueID, &messageBuffer, BUFFER_SIZE + sizeof(int), 0) ==
+  if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
       -1) {
     perror("Error responding to client request of type 1 in msgsnd");
     exit(1);
