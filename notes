@@ -14,3 +14,6 @@ MESSAGE QUEUE MTYPES
   3: client deletion
   4-6: client reqeusts of types 1-3 respectively
 11+: to send a message to client with id n, use mtype n + 10
+
+NOTES
+until we get the message queue deletion code in place, run `ipcrm --all=msg` after closing the server every time to manually delete the queue   
