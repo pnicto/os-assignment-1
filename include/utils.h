@@ -9,6 +9,7 @@
 
 struct MessageBuffer {
   long mtype;
+  int clientID;
   char mtext[BUFFER_SIZE];
 };
 
