@@ -51,21 +51,23 @@ int main() {
 void pingServer(int clientID, int messageQueueID) {
   struct MessageBuffer requestBuffer, responseBuffer;
   requestBuffer.mtype = 4;
+  requestBuffer.clientID = clientID;
 
   char* message = (char*)malloc(sizeof(char) * BUFFER_SIZE);
   sprintf(message, "%d", clientID);
   message = strcat(message, MESSSAGE_DELIMITER);
   message = strcat(message, "hi");
 
-  size_t messageLength = (size_t)sprintf(requestBuffer.mtext, "%s", message);
+  sprintf(requestBuffer.mtext, "%s", message);
   free(message);
 
-  if (msgsnd(messageQueueID, &requestBuffer, messageLength + 1, 0) == -1) {
+  if (msgsnd(messageQueueID, &requestBuffer, BUFFER_SIZE + sizeof(int), 0) ==
+      -1) {
     perror("Error sending message in msgsnd");
     exit(1);
   }
 
-  if (msgrcv(messageQueueID, &responseBuffer, sizeof(responseBuffer.mtext),
+  if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
              clientID, 0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
