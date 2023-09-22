@@ -1,6 +1,6 @@
 # Compiler and flags
 CC := gcc
-CFLAGS := -Wall -Wextra -Iinclude -Wconversion -pedantic-errors -Werror
+CFLAGS := -g -Wall -Wextra -Iinclude -Wconversion -pedantic-errors -Werror
 
 # Source directory, target directory, and source files
 SRC_DIR := src
