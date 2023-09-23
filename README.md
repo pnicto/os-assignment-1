@@ -60,11 +60,14 @@ If you prefer to compile and run the code manually without the Makefile, follow 
      gcc -Wall -Wextra -Iinclude -Wconversion -pedantic-errors -Werror -o file_name src/file_name.c
      ```
 
-   Repeat this step for each source file in your project. This will compile the source code and generate executable files in the `bin` directory.
+   Repeat this step for each source file in your project. This will compile the source code and generate executable files in the project root.
 
 2. **Run a specific program**:
 
    - After manually compiling the code, you can execute a specific program by specifying its name. For example:
+
+     > [!IMPORTANT]  
+     > The binaries when compiled manually are supposed to be run from the project root directory.
 
      ```bash
      ./my_program
