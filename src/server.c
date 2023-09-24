@@ -25,7 +25,8 @@ int main() {
 
   while (1) {
     struct MessageBuffer messageBuffer;
-    if (msgrcv(messageQueueID, &messageBuffer, BUFFER_SIZE + sizeof(int), -9,
+    if (msgrcv(messageQueueID, &messageBuffer,
+               sizeof(messageBuffer) - sizeof(messageBuffer.mtype), -9,
                0) == -1) {
       perror("Error receiving message in msgrcv");
       exit(1);
