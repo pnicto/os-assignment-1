@@ -29,20 +29,23 @@ int main() {
     scanf("%d", &choice);
 
     switch (choice) {
-      case 1:
-        pingServer(clientID, messageQueueID);
-        break;
-        //   case 2:
-        //     fileSearch(clientID, messageQueueID);
-        //     break;
-        //   case 3:
-        //     fileWordCount(clientID, messageQueueID);
-        //     break;
-        //   case 4:
-        //     cleanup(clientID, messageQueueID);
-        //     exit(0);
-      default:
-        printf("Invalid choice\n");
+    case 1:
+      pingServer(clientID, messageQueueID);
+      break;
+    case 2: {
+      printf("Enter the file name to search:\n");
+      char fileName[BUFFER_SIZE];
+      scanf("%s", fileName);
+      fileSearch(clientID, messageQueueID, fileName);
+    } break;
+      //   case 3:
+      //     fileWordCount(clientID, messageQueueID);
+      //     break;
+      //   case 4:
+      //     cleanup(clientID, messageQueueID);
+      //     exit(0);
+    default:
+      printf("Invalid choice\n");
     }
   }
   return 0;
@@ -69,6 +72,29 @@ void pingServer(int clientID, int messageQueueID) {
 
   if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
              clientID, 0) == -1) {
+    perror("Error receiving message in msgrcv");
+    exit(1);
+  }
+
+  printf("%s\n", responseBuffer.mtext);
+}
+
+void fileSearch(int clientID, int messageQueueID, char fileName[]) {
+  struct MessageBuffer requestBuffer, responseBuffer;
+
+  requestBuffer.mtype = 5;
+  requestBuffer.clientID = clientID;
+  snprintf(requestBuffer.mtext, sizeof(requestBuffer.mtext), "%s", fileName);
+
+  if (msgsnd(messageQueueID, &requestBuffer,
+             sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {
+    perror("Error sending message in msgsnd");
+    exit(1);
+  }
+
+  if (msgrcv(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) + sizeof(responseBuffer.mtype), clientID,
+             0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
   }

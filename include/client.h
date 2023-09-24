@@ -12,5 +12,6 @@
 #include "utils.h"
 
 void pingServer(int clientID, int messageQueueID);
+void fileSearch(int clientID, int messageQueueID, char fileName[]);
 
 #endif
