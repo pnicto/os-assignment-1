@@ -93,7 +93,7 @@ void fileSearch(int clientID, int messageQueueID, char fileName[]) {
   }
 
   if (msgrcv(messageQueueID, &responseBuffer,
-             sizeof(responseBuffer) + sizeof(responseBuffer.mtype), clientID,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), clientID,
              0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
