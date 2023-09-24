@@ -9,6 +9,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "utils.h"
@@ -16,5 +17,6 @@
 #define MAX_CLIENTS 90
 
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer);
+void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer);
 
 #endif
