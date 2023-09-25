@@ -18,6 +18,7 @@ int main() {
   printf("Enter Client-ID: ");
   scanf("%d", &clientID);
   clientID += 10;
+  createClient(clientID, messageQueueID);
 
   while (1) {
     printf(
@@ -29,26 +30,49 @@ int main() {
     scanf("%d", &choice);
 
     switch (choice) {
-    case 1:
-      pingServer(clientID, messageQueueID);
-      break;
-    case 2: {
-      printf("Enter the file name to search:\n");
-      char fileName[BUFFER_SIZE];
-      scanf("%s", fileName);
-      fileSearch(clientID, messageQueueID, fileName);
-    } break;
-      //   case 3:
-      //     fileWordCount(clientID, messageQueueID);
-      //     break;
-      //   case 4:
-      //     cleanup(clientID, messageQueueID);
-      //     exit(0);
-    default:
-      printf("Invalid choice\n");
+      case 1:
+        pingServer(clientID, messageQueueID);
+        break;
+      case 2: {
+        printf("Enter the file name to search:\n");
+        char fileName[BUFFER_SIZE];
+        scanf("%s", fileName);
+        fileSearch(clientID, messageQueueID, fileName);
+      } break;
+        //   case 3:
+        //     fileWordCount(clientID, messageQueueID);
+        //     break;
+        //   case 4:
+        //     cleanup(clientID, messageQueueID);
+        //     exit(0);
+      default:
+        printf("Invalid choice\n");
     }
   }
   return 0;
+}
+
+void createClient(int clientID, int messageQueueID) {
+  struct MessageBuffer requestBuffer, responseBuffer;
+  requestBuffer.mtype = 2;
+  requestBuffer.clientID = clientID;
+
+  if (msgsnd(messageQueueID, &requestBuffer, BUFFER_SIZE + sizeof(int), 0) ==
+      -1) {
+    perror("Error sending message in msgsnd");
+    exit(1);
+  }
+
+  if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
+             clientID, 0) == -1) {
+    perror("Error receiving message in msgrcv");
+    exit(1);
+  }
+
+  printf("%s\n", responseBuffer.mtext);
+  if(responseBuffer.clientID == 0) {
+    exit(0);
+  }
 }
 
 void pingServer(int clientID, int messageQueueID) {

@@ -2,11 +2,11 @@
 
 int main() {
   printf("Initializing server...\n");
-  // bool existingClients[MAX_CLIENTS];
+  bool existingClients[MAX_CLIENTS];
 
-  // for (int i = 0; i < MAX_CLIENTS; i++) {
-  //   existingClients[i] = false;
-  // }
+  for (int i = 0; i < MAX_CLIENTS; i++) {
+    existingClients[i] = false;
+  }
 
   int messageQueueID;
   key_t messageQueueKey;
@@ -47,6 +47,8 @@ int main() {
       exit(0);
     } else if (messageBuffer.mtype == 2) {
       // add client to existing clients list
+      printf("Serving client creation request");
+      createClient(messageQueueID, existingClients, messageBuffer);
     } else {
       printf("Serving request of type %ld\n", messageBuffer.mtype - 3);
       pid_t pid = fork();
@@ -58,26 +60,60 @@ int main() {
 
       if (pid == 0) {
         switch (messageBuffer.mtype) {
-          // case 3:
-          // remove client from existing clients list
-          // break;
-        case 4:
-          pingResponse(messageQueueID, messageBuffer);
-          break;
-        case 5:
-          fileSearch(messageQueueID, messageBuffer);
-          break;
-        // case 6:
-        //   fileWordCount(messageQueueID, messageBuffer);
-        //   break;
-        default:
-          break;
+            // case 3:
+            // remove client from existing clients list
+            // break;
+          case 4:
+            pingResponse(messageQueueID, messageBuffer);
+            break;
+          case 5:
+            fileSearch(messageQueueID, messageBuffer);
+            break;
+          // case 6:
+          //   fileWordCount(messageQueueID, messageBuffer);
+          //   break;
+          default:
+            break;
         }
       }
     }
   }
 
   return 0;
+}
+
+void createClient(int messageQueueID, bool existingClients[],
+                  struct MessageBuffer requestBuffer) {
+  struct MessageBuffer responseBuffer;
+  responseBuffer.mtype = requestBuffer.clientID;
+  responseBuffer.clientID = 0;
+  int invalidMessageType = 0;
+
+  if (requestBuffer.clientID > MAX_CLIENTS - 11 ||
+      requestBuffer.clientID < 11) {
+    invalidMessageType = 1;
+  } else if (existingClients[requestBuffer.clientID - 11] == true) {
+    invalidMessageType = 2;
+  }
+
+  if (invalidMessageType == 0) {
+    responseBuffer.clientID = 1;
+    sprintf(responseBuffer.mtext, "Client connected to server successfully");
+    existingClients[requestBuffer.clientID - 11] = true;
+  } else if (invalidMessageType == 1) {
+    sprintf(responseBuffer.mtext,
+            "Invalid ClientID, client ID needs to range between 1 and %d",
+            MAX_CLIENTS);
+  } else {
+    sprintf(responseBuffer.mtext,
+            "Another client with the same ClientID already exists, please use "
+            "another ClientID");
+  }
+
+  if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
+      -1) {
+    perror("Error responding to create client request in msgsnd");
+  }
 }
 
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {

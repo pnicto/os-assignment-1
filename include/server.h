@@ -16,6 +16,8 @@
 
 #define MAX_CLIENTS 90
 
+void createClient(int messageQueueID, bool existingClients[],
+                  struct MessageBuffer requestBuffer);
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer);
 void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer);
 
