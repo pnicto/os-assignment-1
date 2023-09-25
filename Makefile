@@ -21,5 +21,5 @@ clean:
 
 .PHONY: all clean
 
-run-%: $(BIN_DIR)/%
+run-%: $(BIN_DIR)/% $(DEPS)
 	./$<
