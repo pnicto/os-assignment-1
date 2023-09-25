@@ -1,6 +1,6 @@
 #ifndef CLEANUP_H
 #define CLEANUP_H
 
-#include <stdio.h>
+#include "../include/utils.h"
 
 #endif
