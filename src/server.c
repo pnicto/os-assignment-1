@@ -34,6 +34,17 @@ int main() {
 
     if (messageBuffer.mtype == 1) {
       // perform cleanup
+      // wait for all the children to terminate
+      printf("Cleaning up...\n");
+      while (wait(NULL) > 0)
+        ;
+      printf("Removing message queue\n");
+      if (msgctl(messageQueueID, IPC_RMID, NULL) == -1) {
+        perror("Removing queue failed");
+        exit(1);
+      }
+      printf("Exiting\n");
+      exit(0);
     } else if (messageBuffer.mtype == 2) {
       // add client to existing clients list
     } else {
