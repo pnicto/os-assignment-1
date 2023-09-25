@@ -46,9 +46,10 @@ int main() {
       printf("Exiting\n");
       exit(0);
     } else if (messageBuffer.mtype == 2) {
-      // add client to existing clients list
-      printf("Serving client creation request");
       createClient(messageQueueID, existingClients, messageBuffer);
+    } else if (messageBuffer.mtype == 3) {
+      printf("Serving request of type 4\n");
+      cleanupClient(messageQueueID, existingClients, messageBuffer);
     } else {
       printf("Serving request of type %ld\n", messageBuffer.mtype - 3);
       pid_t pid = fork();
@@ -60,9 +61,6 @@ int main() {
 
       if (pid == 0) {
         switch (messageBuffer.mtype) {
-            // case 3:
-            // remove client from existing clients list
-            // break;
           case 4:
             pingResponse(messageQueueID, messageBuffer);
             break;
@@ -88,6 +86,8 @@ void createClient(int messageQueueID, bool existingClients[],
   responseBuffer.mtype = requestBuffer.clientID;
   responseBuffer.clientID = 0;
   int invalidMessageType = 0;
+
+  printf("Serving create client request for clientID %d\n", requestBuffer.clientID - 10);
 
   if (requestBuffer.clientID > MAX_CLIENTS - 11 ||
       requestBuffer.clientID < 11) {
@@ -166,4 +166,19 @@ void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer) {
     exit(1);
   }
   exit(0);
+}
+
+void cleanupClient(int messageQueueID, bool existingClients[],
+                   struct MessageBuffer requestBuffer) {
+  struct MessageBuffer responseBuffer;
+  responseBuffer.mtype = requestBuffer.clientID;
+
+  sprintf(responseBuffer.mtext, "Client with clientID %d shutting down",
+          requestBuffer.clientID - 10);
+  existingClients[requestBuffer.clientID - 11] = false;
+
+  if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
+      -1) {
+    perror("Error responding to create client request in msgsnd");
+  }
 }

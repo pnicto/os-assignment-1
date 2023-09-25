@@ -42,9 +42,9 @@ int main() {
         //   case 3:
         //     fileWordCount(clientID, messageQueueID);
         //     break;
-        //   case 4:
-        //     cleanup(clientID, messageQueueID);
-        //     exit(0);
+      case 4:
+        cleanupClient(clientID, messageQueueID);
+        exit(0);
       default:
         printf("Invalid choice\n");
     }
@@ -119,6 +119,26 @@ void fileSearch(int clientID, int messageQueueID, char fileName[]) {
   if (msgrcv(messageQueueID, &responseBuffer,
              sizeof(responseBuffer) - sizeof(responseBuffer.mtype), clientID,
              0) == -1) {
+    perror("Error receiving message in msgrcv");
+    exit(1);
+  }
+
+  printf("%s\n", responseBuffer.mtext);
+}
+
+void cleanupClient(int clientID, int messageQueueID) {
+  struct MessageBuffer requestBuffer, responseBuffer;
+  requestBuffer.mtype = 3;
+  requestBuffer.clientID = clientID;
+
+  if (msgsnd(messageQueueID, &requestBuffer, BUFFER_SIZE + sizeof(int), 0) ==
+      -1) {
+    perror("Error sending message in msgsnd");
+    exit(1);
+  }
+
+  if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
+             clientID, 0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
   }
