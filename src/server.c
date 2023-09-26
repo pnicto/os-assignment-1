@@ -188,9 +188,6 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
   }
 
   pid_t pid = fork();
-  struct MessageBuffer responseBuffer;
-  responseBuffer.mtype = requestBuffer.clientID;
-  responseBuffer.clientID = -1;
 
   if (pid < 0) {
     perror("Error creating child process in fork");
@@ -204,36 +201,37 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
     close(fd[1]);
     execlp("/usr/bin/wc", "wc", "-w", requestBuffer.mtext, NULL);
     exit(1);
-  } else {
-    // parent
-    int childStatus;
-    wait(&childStatus);
-    close(fd[1]);
-    if (childStatus == 0) {
-      // file exists
-      char buf[BUFFER_SIZE];
-      read(fd[0], &buf, sizeof(buf));
-      close(fd[0]);
-
-      for (int i = 0; i < BUFFER_SIZE; i++)
-        if (buf[i] == ' ') {
-          buf[i] = 0;
-          break;
-        }
-
-      int numOfWords = atoi(buf);
-
-      snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
-               "Number of words in the file: %d", numOfWords);
-
-    } else {
-      // file does not exist
-      close(fd[0]);
-      snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
-               "File does not exist");
-    }
   }
+  // parent
+  struct MessageBuffer responseBuffer;
+  responseBuffer.mtype = requestBuffer.clientID;
+  responseBuffer.clientID = -1;
+  int childStatus;
+  wait(&childStatus);
+  close(fd[1]);
+  if (childStatus == 0) {
+    // file exists
+    char buf[BUFFER_SIZE];
+    read(fd[0], &buf, sizeof(buf));
+    close(fd[0]);
 
+    for (int i = 0; i < BUFFER_SIZE; i++)
+      if (buf[i] == ' ') {
+        buf[i] = 0;
+        break;
+      }
+
+    int numOfWords = atoi(buf);
+
+    snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
+             "Number of words in the file: %d", numOfWords);
+
+  } else {
+    // file does not exist
+    close(fd[0]);
+    snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
+             "File does not exist");
+  }
   if (msgsnd(messageQueueID, &responseBuffer,
              sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
     perror("Error responding to client request of type 3 in msgsnd");
