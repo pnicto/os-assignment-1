@@ -31,9 +31,7 @@ int main() {
       perror("Error sending message in msgsnd");
       exit(1);
     }
-  } else if (input == 'N' || input == 'n') {
-    return 0;
-  } else {
+  } else if (!(input == 'N' || input == 'n')) {
     printf("Invalid input\n");
   }
 
