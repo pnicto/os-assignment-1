@@ -39,9 +39,12 @@ int main() {
         scanf("%s", fileName);
         fileSearch(clientID, messageQueueID, fileName);
       } break;
-        //   case 3:
-        //     fileWordCount(clientID, messageQueueID);
-        //     break;
+      case 3:
+        printf("Enter the file path: ");
+        char filePath[BUFFER_SIZE];
+        scanf(" %s", filePath);
+        fileWordCount(clientID, messageQueueID, filePath);
+        break;
       case 4:
         cleanupClient(clientID, messageQueueID);
         exit(0);
@@ -109,6 +112,29 @@ void fileSearch(int clientID, int messageQueueID, char fileName[]) {
   requestBuffer.mtype = 5;
   requestBuffer.clientID = clientID;
   snprintf(requestBuffer.mtext, sizeof(requestBuffer.mtext), "%s", fileName);
+
+  if (msgsnd(messageQueueID, &requestBuffer,
+             sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {
+    perror("Error sending message in msgsnd");
+    exit(1);
+  }
+
+  if (msgrcv(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), clientID,
+             0) == -1) {
+    perror("Error receiving message in msgrcv");
+    exit(1);
+  }
+
+  printf("%s\n", responseBuffer.mtext);
+}
+
+void fileWordCount(int clientID, int messageQueueID, char filePath[]) {
+  struct MessageBuffer requestBuffer, responseBuffer;
+
+  requestBuffer.mtype = 6;
+  requestBuffer.clientID = clientID;
+  snprintf(requestBuffer.mtext, sizeof(requestBuffer.mtext), "%s", filePath);
 
   if (msgsnd(messageQueueID, &requestBuffer,
              sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {

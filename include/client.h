@@ -14,6 +14,7 @@
 void createClient(int clientID, int messageQueueID);
 void pingServer(int clientID, int messageQueueID);
 void fileSearch(int clientID, int messageQueueID, char fileName[]);
+void fileWordCount(int clientID, int messageQueueID, char filePath[]);
 void cleanupClient(int clientID, int messageQueueID);
 
 #endif

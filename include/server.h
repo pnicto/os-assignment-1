@@ -20,6 +20,7 @@ void createClient(int messageQueueID, bool existingClients[],
                   struct MessageBuffer requestBuffer);
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer);
 void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer);
+void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer);
 void cleanupClient(int messageQueueID, bool existingClients[],
                   struct MessageBuffer requestBuffer);
 

@@ -77,9 +77,9 @@ int main() {
         case 5:
           fileSearch(messageQueueID, messageBuffer);
           break;
-        // case 6:
-        //   fileWordCount(messageQueueID, messageBuffer);
-        //   break;
+        case 6:
+          fileWordCount(messageQueueID, messageBuffer);
+          break;
         default:
           break;
         }
@@ -174,6 +174,48 @@ void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer) {
   if (msgsnd(messageQueueID, &responseBuffer,
              sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
     perror("Error responding to client request of type 2 in msgsnd");
+    exit(1);
+  }
+  exit(0);
+}
+
+void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
+  int fd[2];
+  if (pipe(fd) == -1) {
+    perror("Error creating pipe");
+    exit(1);
+  }
+
+  pid_t pid = fork();
+  struct MessageBuffer responseBuffer;
+  responseBuffer.mtype = requestBuffer.clientID;
+  responseBuffer.clientID = -1;
+
+  if (pid < 0) {
+    perror("Error creating child process in fork");
+    exit(1);
+  }
+
+  if (pid == 0) {
+    // child
+    dup2(fd[1],1);
+    close(fd[0]);
+    close(fd[1]);
+    execlp("/usr/bin/wc", "wc", "-w", requestBuffer.mtext, NULL);
+    exit(1);
+  } else {
+    // parent
+    wait(NULL);
+    
+    close(fd[1]);
+    read(fd[0],&responseBuffer.mtext, sizeof(responseBuffer.mtext));
+    close(fd[0]);
+  
+  }
+
+  if (msgsnd(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
+    perror("Error responding to client request of type 3 in msgsnd");
     exit(1);
   }
   exit(0);
