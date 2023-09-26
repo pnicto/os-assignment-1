@@ -199,18 +199,39 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
   if (pid == 0) {
     // child
     dup2(fd[1],1);
-    dup2(fd[1],2);
     close(fd[0]);
     close(fd[1]);
     execlp("/usr/bin/wc", "wc", "-w", requestBuffer.mtext, NULL);
     exit(1);
   } else {
     // parent
-    wait(NULL);
-    
+    int childStatus;
+    wait(&childStatus);
     close(fd[1]);
-    read(fd[0],&responseBuffer.mtext, sizeof(responseBuffer.mtext));
-    close(fd[0]);
+    if (childStatus == 0) {
+      // file exists
+      char buf[BUFFER_SIZE];
+      read(fd[0],&buf, sizeof(buf));
+      close(fd[0]);
+
+      for (int i = 0; i < BUFFER_SIZE; i++)
+        if (buf[i] == ' '){
+          buf[i] = 0;
+          break;
+        }
+      
+      int numOfWords = atoi(buf);
+      
+      snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
+               "Number of words in the file: %d",numOfWords);
+
+    } else {
+      // file does not exist
+      close(fd[0]);
+      snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
+               "File does not exist");
+    }
+    
   
   }
 
