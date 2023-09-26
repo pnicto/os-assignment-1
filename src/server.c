@@ -199,6 +199,7 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
   if (pid == 0) {
     // child
     dup2(fd[1],1);
+    dup2(fd[1],2);
     close(fd[0]);
     close(fd[1]);
     execlp("/usr/bin/wc", "wc", "-w", requestBuffer.mtext, NULL);
