@@ -108,7 +108,7 @@ void createClient(int messageQueueID, bool existingClients[],
   }
 
   if (invalidMessageType == 0) {
-    responseBuffer.clientID = 1;
+    responseBuffer.clientID = -1;
     sprintf(responseBuffer.mtext, "Client connected to server successfully");
     existingClients[requestBuffer.clientID - 11] = true;
   } else if (invalidMessageType == 1) {
@@ -130,6 +130,7 @@ void createClient(int messageQueueID, bool existingClients[],
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {
   struct MessageBuffer responseBuffer;
   responseBuffer.mtype = requestBuffer.clientID;
+  responseBuffer.clientID = -1;
   sprintf(responseBuffer.mtext, "hello");
 
   if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
@@ -247,6 +248,7 @@ void cleanupClient(int messageQueueID, bool existingClients[],
                    struct MessageBuffer requestBuffer) {
   struct MessageBuffer responseBuffer;
   responseBuffer.mtype = requestBuffer.clientID;
+  responseBuffer.clientID = -1;
 
   sprintf(responseBuffer.mtext, "Client with clientID %d shutting down",
           requestBuffer.clientID - 10);
