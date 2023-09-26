@@ -60,20 +60,21 @@ void createClient(int clientID, int messageQueueID) {
   requestBuffer.mtype = 2;
   requestBuffer.clientID = clientID;
 
-  if (msgsnd(messageQueueID, &requestBuffer, BUFFER_SIZE + sizeof(int), 0) ==
-      -1) {
+  if (msgsnd(messageQueueID, &requestBuffer,
+             sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {
     perror("Error sending message in msgsnd");
     exit(1);
   }
 
-  if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
-             clientID, 0) == -1) {
+  if (msgrcv(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), clientID,
+             0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
   }
 
   printf("%s\n", responseBuffer.mtext);
-  if(responseBuffer.clientID == 0) {
+  if (responseBuffer.clientID == 0) {
     exit(0);
   }
 }
@@ -91,14 +92,15 @@ void pingServer(int clientID, int messageQueueID) {
   sprintf(requestBuffer.mtext, "%s", message);
   free(message);
 
-  if (msgsnd(messageQueueID, &requestBuffer, BUFFER_SIZE + sizeof(int), 0) ==
-      -1) {
+  if (msgsnd(messageQueueID, &requestBuffer,
+             sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {
     perror("Error sending message in msgsnd");
     exit(1);
   }
 
-  if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
-             clientID, 0) == -1) {
+  if (msgrcv(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), clientID,
+             0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
   }
@@ -157,14 +159,15 @@ void cleanupClient(int clientID, int messageQueueID) {
   requestBuffer.mtype = 3;
   requestBuffer.clientID = clientID;
 
-  if (msgsnd(messageQueueID, &requestBuffer, BUFFER_SIZE + sizeof(int), 0) ==
-      -1) {
+  if (msgsnd(messageQueueID, &requestBuffer,
+             sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {
     perror("Error sending message in msgsnd");
     exit(1);
   }
 
-  if (msgrcv(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int),
-             clientID, 0) == -1) {
+  if (msgrcv(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), clientID,
+             0) == -1) {
     perror("Error receiving message in msgrcv");
     exit(1);
   }

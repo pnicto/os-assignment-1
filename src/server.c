@@ -71,17 +71,17 @@ int main() {
 
       if (pid == 0) {
         switch (messageBuffer.mtype) {
-        case 4:
-          pingResponse(messageQueueID, messageBuffer);
-          break;
-        case 5:
-          fileSearch(messageQueueID, messageBuffer);
-          break;
-        case 6:
-          fileWordCount(messageQueueID, messageBuffer);
-          break;
-        default:
-          break;
+          case 4:
+            pingResponse(messageQueueID, messageBuffer);
+            break;
+          case 5:
+            fileSearch(messageQueueID, messageBuffer);
+            break;
+          case 6:
+            fileWordCount(messageQueueID, messageBuffer);
+            break;
+          default:
+            break;
         }
       }
     }
@@ -121,8 +121,8 @@ void createClient(int messageQueueID, bool existingClients[],
             "another ClientID");
   }
 
-  if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
-      -1) {
+  if (msgsnd(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
     perror("Error responding to create client request in msgsnd");
   }
 }
@@ -133,8 +133,8 @@ void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {
   responseBuffer.clientID = -1;
   sprintf(responseBuffer.mtext, "hello");
 
-  if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
-      -1) {
+  if (msgsnd(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
     perror("Error responding to client request of type 1 in msgsnd");
     exit(1);
   }
@@ -199,7 +199,7 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
 
   if (pid == 0) {
     // child
-    dup2(fd[1],1);
+    dup2(fd[1], 1);
     close(fd[0]);
     close(fd[1]);
     execlp("/usr/bin/wc", "wc", "-w", requestBuffer.mtext, NULL);
@@ -212,19 +212,19 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
     if (childStatus == 0) {
       // file exists
       char buf[BUFFER_SIZE];
-      read(fd[0],&buf, sizeof(buf));
+      read(fd[0], &buf, sizeof(buf));
       close(fd[0]);
 
       for (int i = 0; i < BUFFER_SIZE; i++)
-        if (buf[i] == ' '){
+        if (buf[i] == ' ') {
           buf[i] = 0;
           break;
         }
-      
+
       int numOfWords = atoi(buf);
-      
+
       snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
-               "Number of words in the file: %d",numOfWords);
+               "Number of words in the file: %d", numOfWords);
 
     } else {
       // file does not exist
@@ -232,8 +232,6 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
       snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
                "File does not exist");
     }
-    
-  
   }
 
   if (msgsnd(messageQueueID, &responseBuffer,
@@ -254,8 +252,8 @@ void cleanupClient(int messageQueueID, bool existingClients[],
           requestBuffer.clientID - 10);
   existingClients[requestBuffer.clientID - 11] = false;
 
-  if (msgsnd(messageQueueID, &responseBuffer, BUFFER_SIZE + sizeof(int), 0) ==
-      -1) {
+  if (msgsnd(messageQueueID, &responseBuffer,
+             sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
     perror("Error responding to create client request in msgsnd");
   }
 }
