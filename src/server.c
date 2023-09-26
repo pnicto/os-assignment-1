@@ -2,11 +2,7 @@
 
 int main() {
   printf("Initializing server...\n");
-  bool existingClients[MAX_CLIENTS];
-
-  for (int i = 0; i < MAX_CLIENTS; i++) {
-    existingClients[i] = false;
-  }
+  bool existingClients[MAX_CLIENTS] = {0};
 
   int messageQueueID;
   key_t messageQueueKey;
