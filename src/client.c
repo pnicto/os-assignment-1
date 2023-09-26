@@ -10,7 +10,7 @@ int main() {
   }
 
   if ((messageQueueID = msgget(messageQueueKey, PERMS)) == -1) {
-    perror("Error connecting to message queue in msgget. Is the server on?\n");
+    perror("Error connecting to message queue in msgget. Is the server on?");
     exit(1);
   }
 
