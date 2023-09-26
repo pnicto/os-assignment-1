@@ -32,14 +32,28 @@ int main() {
       // perform cleanup
       // wait for all the children to terminate
       printf("Cleaning up...\n");
-      while (wait(NULL) > 0)
-        ;
-      printf("Removing message queue\n");
+
+      while (1) {
+        pid_t childPid = wait(NULL);
+        if (childPid > 0) {
+          printf("Waited for child process with pid %d\n", childPid);
+        } else if (childPid == -1) {
+          if (errno == ECHILD) {
+            printf("No more children to wait for\n");
+            break;
+          } else {
+            perror("Error waiting for child process");
+            exit(1);
+          }
+        }
+      }
+
+      printf("Removing message queue...\n");
       if (msgctl(messageQueueID, IPC_RMID, NULL) == -1) {
         perror("Removing queue failed");
         exit(1);
       }
-      printf("Exiting\n");
+      printf("Exiting...\n");
       exit(0);
     } else if (messageBuffer.mtype == 2) {
       createClient(messageQueueID, existingClients, messageBuffer);
@@ -57,17 +71,17 @@ int main() {
 
       if (pid == 0) {
         switch (messageBuffer.mtype) {
-          case 4:
-            pingResponse(messageQueueID, messageBuffer);
-            break;
-          case 5:
-            fileSearch(messageQueueID, messageBuffer);
-            break;
-          // case 6:
-          //   fileWordCount(messageQueueID, messageBuffer);
-          //   break;
-          default:
-            break;
+        case 4:
+          pingResponse(messageQueueID, messageBuffer);
+          break;
+        case 5:
+          fileSearch(messageQueueID, messageBuffer);
+          break;
+        // case 6:
+        //   fileWordCount(messageQueueID, messageBuffer);
+        //   break;
+        default:
+          break;
         }
       }
     }
@@ -83,7 +97,8 @@ void createClient(int messageQueueID, bool existingClients[],
   responseBuffer.clientID = 0;
   int invalidMessageType = 0;
 
-  printf("Serving create client request for clientID %d\n", requestBuffer.clientID - 10);
+  printf("Serving create client request for clientID %d\n",
+         requestBuffer.clientID - 10);
 
   if (requestBuffer.clientID > MAX_CLIENTS - 11 ||
       requestBuffer.clientID < 11) {
