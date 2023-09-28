@@ -84,13 +84,7 @@ void pingServer(int clientID, int messageQueueID) {
   requestBuffer.mtype = 4;
   requestBuffer.clientID = clientID;
 
-  char* message = (char*)malloc(sizeof(char) * BUFFER_SIZE);
-  sprintf(message, "%d", clientID);
-  message = strcat(message, MESSSAGE_DELIMITER);
-  message = strcat(message, "hi");
-
-  sprintf(requestBuffer.mtext, "%s", message);
-  free(message);
+  sprintf(requestBuffer.mtext, "hi");
 
   if (msgsnd(messageQueueID, &requestBuffer,
              sizeof(requestBuffer) - sizeof(requestBuffer.mtype), 0) == -1) {
