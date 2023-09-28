@@ -36,13 +36,13 @@ int main() {
       case 2: {
         printf("Enter the file name to search:\n");
         char fileName[BUFFER_SIZE];
-        scanf("%s", fileName);
+        scanf(" %[^\n]s", fileName);
         fileSearch(clientID, messageQueueID, fileName);
       } break;
       case 3:
         printf("Enter the file path: ");
         char filePath[BUFFER_SIZE];
-        scanf(" %s", filePath);
+        scanf(" %[^\n]s", filePath);
         fileWordCount(clientID, messageQueueID, filePath);
         break;
       case 4:
