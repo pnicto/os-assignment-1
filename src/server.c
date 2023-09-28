@@ -58,10 +58,12 @@ int main() {
     } else if (messageBuffer.mtype == 2) {
       createClient(messageQueueID, existingClients, messageBuffer);
     } else if (messageBuffer.mtype == 3) {
-      printf("Serving request of type 4\n");
+      printf("Serving request of type 4 from client %d\n",
+             messageBuffer.clientID - 10);
       cleanupClient(messageQueueID, existingClients, messageBuffer);
     } else {
-      printf("Serving request of type %ld\n", messageBuffer.mtype - 3);
+      printf("Serving request of type %ld from client %d\n",
+             messageBuffer.mtype - 3, messageBuffer.clientID - 10);
       pid_t pid = fork();
 
       if (pid < 0) {
@@ -128,6 +130,8 @@ void createClient(int messageQueueID, bool existingClients[],
 }
 
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {
+  printf("The client says %s\n", requestBuffer.mtext);
+
   struct MessageBuffer responseBuffer;
   responseBuffer.mtype = requestBuffer.clientID;
   responseBuffer.clientID = -1;
