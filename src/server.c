@@ -144,9 +144,6 @@ void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {
 
 void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer) {
   pid_t pid = fork();
-  struct MessageBuffer responseBuffer;
-  responseBuffer.mtype = requestBuffer.clientID;
-  responseBuffer.clientID = -1;
 
   if (pid < 0) {
     perror("Error creating child process in fork");
@@ -161,19 +158,21 @@ void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer) {
     close(null);
     execlp("/usr/bin/find", "find", requestBuffer.mtext, NULL);
     exit(1);
+  }
+  // parent
+  struct MessageBuffer responseBuffer;
+  responseBuffer.mtype = requestBuffer.clientID;
+  responseBuffer.clientID = -1;
+  int childStatus;
+  wait(&childStatus);
+  if (childStatus == 0) {
+    // file exists
+    snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
+             "Found the requested file");
   } else {
-    // parent
-    int childStatus;
-    wait(&childStatus);
-    if (childStatus == 0) {
-      // file exists
-      snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
-               "Found the requested file");
-    } else {
-      // file does not exist
-      snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
-               "File does not exist");
-    }
+    // file does not exist
+    snprintf(responseBuffer.mtext, sizeof(responseBuffer.mtext),
+             "File does not exist");
   }
 
   if (msgsnd(messageQueueID, &responseBuffer,
@@ -202,12 +201,12 @@ void fileWordCount(int messageQueueID, struct MessageBuffer requestBuffer) {
     // child
     fflush(stdout);
     fflush(stderr);
-    
+
     int devNull = open("/dev/null", O_WRONLY);
-    
+
     dup2(fd[1], STDOUT_FILENO);
     dup2(devNull, STDERR_FILENO);
-    
+
     close(fd[0]);
     close(fd[1]);
     execlp("/usr/bin/wc", "wc", "-w", requestBuffer.mtext, NULL);
