@@ -25,34 +25,17 @@ int main() {
                sizeof(messageBuffer) - sizeof(messageBuffer.mtype), -9,
                0) == -1) {
       perror("Error receiving message in msgrcv");
+      if (errno != EIDRM) {
+        printf("Attempting to cleanup...\n");
+        cleanupServer(messageQueueID);
+      }
       exit(1);
     }
 
     if (messageBuffer.mtype == 1) {
       // perform cleanup
-      // wait for all the children to terminate
-      printf("Cleaning up...\n");
+      cleanupServer(messageQueueID);
 
-      while (1) {
-        pid_t childPid = wait(NULL);
-        if (childPid > 0) {
-          printf("Waited for child process with pid %d\n", childPid);
-        } else if (childPid == -1) {
-          if (errno == ECHILD) {
-            printf("No more children to wait for\n");
-            break;
-          } else {
-            perror("Error waiting for child process");
-            exit(1);
-          }
-        }
-      }
-
-      printf("Removing message queue...\n");
-      if (msgctl(messageQueueID, IPC_RMID, NULL) == -1) {
-        perror("Removing queue failed");
-        exit(1);
-      }
       printf("Exiting...\n");
       exit(0);
     } else if (messageBuffer.mtype == 2) {
@@ -267,5 +250,31 @@ void cleanupClient(int messageQueueID, bool existingClients[],
   if (msgsnd(messageQueueID, &responseBuffer,
              sizeof(responseBuffer) - sizeof(responseBuffer.mtype), 0) == -1) {
     perror("Error responding to create client request in msgsnd");
+  }
+}
+
+void cleanupServer(int messageQueueID) {
+  // wait for all the children to terminate
+  printf("Cleaning up...\n");
+
+  while (1) {
+    pid_t childPid = wait(NULL);
+    if (childPid > 0) {
+      printf("Waited for child process with pid %d\n", childPid);
+    } else if (childPid == -1) {
+      if (errno == ECHILD) {
+        printf("No more children to wait for\n");
+        break;
+      } else {
+        perror("Error waiting for child process");
+        exit(1);
+      }
+    }
+  }
+
+  printf("Removing message queue...\n");
+  if (msgctl(messageQueueID, IPC_RMID, NULL) == -1) {
+    perror("Removing queue failed");
+    exit(1);
   }
 }
