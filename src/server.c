@@ -155,6 +155,10 @@ void fileSearch(int messageQueueID, struct MessageBuffer requestBuffer) {
 
   if (pid == 0) {
     // child
+    int null = open("/dev/null", O_WRONLY);
+    dup2(null, 1);
+    dup2(null, 2);
+    close(null);
     execlp("/usr/bin/find", "find", requestBuffer.mtext, NULL);
     exit(1);
   } else {
