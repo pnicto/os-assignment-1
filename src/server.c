@@ -113,7 +113,8 @@ void createClient(int messageQueueID, bool existingClients[],
 }
 
 void pingResponse(int messageQueueID, struct MessageBuffer requestBuffer) {
-  printf("The client says %s\n", requestBuffer.mtext);
+  printf("Client %d says %s\n", requestBuffer.clientID - 10,
+         requestBuffer.mtext);
 
   struct MessageBuffer responseBuffer;
   responseBuffer.mtype = requestBuffer.clientID;
